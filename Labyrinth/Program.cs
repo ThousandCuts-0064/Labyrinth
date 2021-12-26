@@ -44,7 +44,6 @@ namespace Labyrinth
                 if (ExplorePath(path, path.Location.Left())) break;
 
                 explorationList.Sort((curr, next) => next.DistanceSum - curr.DistanceSum);
-                Draw(); //HACK
             }
 
             if (Path.End.Entrance == null)
@@ -70,14 +69,14 @@ namespace Labyrinth
             }
 
             // Return true if the current path can connect to the end path.
-            // Otherwise returns false and adds new path to the exploration list.
+            // Otherwise returns false and tries to add new path to the exploration list.
             bool ExplorePath(Path current, Location check)
             {
                 if (check.Row < 0 ||
                     check.Row >= n ||
                     check.Column < 0 ||
                     check.Column >= n ||
-                    labyrinth[check.Row, check.Column] != 0)
+                    labyrinth[check.Row, check.Column] == 1)
                     return false;
 
                 if (Path.TryGetOnLocation(check, out Path existing))
@@ -91,34 +90,9 @@ namespace Labyrinth
                     if (current.DistanceFromStart < existing.DistanceFromStart)
                         existing.SetEntrance(current);
                 }
-                else
-                {
-                    Path path = new Path(current, check);
-                    int checkIndex = explorationList.Count - 1;
-                    while (checkIndex > 0 && path.DistanceSum > explorationList[checkIndex].DistanceSum)
-                    {
-                        checkIndex--;
-                    }
-                    explorationList.Insert(checkIndex + 1, path);
-                    //HACK
-                    Path.TryGetOnLocation(check, out Path curr);
-                    labyrinth[check.Row, check.Column] = curr.DistanceFromStart;
-                }
+                else explorationList.Add(new Path(current, check));
 
                 return false;
-            }
-
-            void Draw()//Hack
-            {
-                Console.SetCursorPosition(0, 0);
-                for (int i = 0; i < n; i++)
-                {
-                    for (int y = 0; y < n; y++)
-                    {
-                        Console.Write(labyrinth[i, y] + new string(' ', 3 - labyrinth[i, y].ToString().Length));
-                    }
-                    Console.WriteLine();
-                }
             }
         }
     }
